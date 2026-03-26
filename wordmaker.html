@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>랜덤 단어 뽑기</title>
+    <style>
+        body {
+            font-family: 'Malgun Gothic', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #result {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 30px 0;
+            min-height: 40px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎲 아무 단어나 뽑아보세요!</h1>
+    <div id="result">단어 뽑기를 시작하세요</div>
+    <button onclick="generateWords()">단어 뽑기</button>
+</div>
+
+<script>
+    // 명사 목록
+    const nouns = [
+        "고양이", "우주선", "냉장고", "마법사", "자전거", 
+        "피자", "외계인", "선생님", "기타", "바다",
+        "호랑이", "컴퓨터", "휴대폰", "구름", "도둑"
+    ];
+    
+    // 동사 형태를 '~는' 으로 변경
+    const verbs = [
+        "먹는", "던지는", "부수는", "사랑하는", "발견하는", 
+        "수리하는", "조립하는", "훔치는", "노래하는", "그리는",
+        "공격하는", "마시는", "숨기는", "기억하는", "잡는"
+    ];
+
+    function generateWords() {
+        // 배열에서 무작위로 하나를 고르는 함수
+        const getRandomWord = (array) => array[Math.floor(Math.random() * array.length)];
+
+        // 명사, 동사, 명사 순서로 뽑기
+        const noun1 = getRandomWord(nouns);
+        const verb = getRandomWord(verbs);
+        const noun2 = getRandomWord(nouns);
+
+        // 결과 화면에 출력
+        const resultText = `${noun1} ${verb} ${noun2}`;
+        document.getElementById("result").innerText = resultText;
+    }
+</script>
+
+</body>
+</html>
