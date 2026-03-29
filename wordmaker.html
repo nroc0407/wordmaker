@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>랜덤 단어 뽑기</title>
+    <title>게임 아이디어 생성기</title>
     <style>
         body {
             font-family: 'Malgun Gothic', sans-serif;
@@ -12,98 +12,95 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background-color: #f0f4f8;
+            background-color: #1e1e2f; /* 게임 개발 감성으로 어두운 배경 */
+            color: #ffffff;
         }
         .container {
             text-align: center;
-            background-color: white;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            background-color: #2a2a40;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            max-width: 600px;
+            width: 90%;
         }
         h1 {
-            color: #333;
-            font-size: 24px;
+            color: #4dd0e1;
+            font-size: 28px;
             margin-bottom: 20px;
         }
         #result {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
-            color: #2c3e50;
-            margin: 30px 0;
-            min-height: 40px;
+            color: #ffb74d;
+            margin: 40px 0;
+            min-height: 80px;
+            line-height: 1.4;
+            word-break: keep-all;
         }
         button {
-            background-color: #3498db;
+            background-color: #ff5252;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 6px;
+            padding: 15px 30px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: background-color 0.3s, transform 0.1s;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #ff1744;
+        }
+        button:active {
+            transform: scale(0.95);
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🎲 아무 단어나 뽑아보세요!</h1>
-    <div id="result">단어 뽑기를 시작하세요</div>
-    <button onclick="generateWords()">단어 뽑기</button>
+    <h1>💡 랜덤 게임 아이디어 제네레이터</h1>
+    <div id="result">새로운 프로젝트 아이디어를 뽑아보세요!</div>
+    <button onclick="generateGameIdea()">아이디어 굴리기 🎲</button>
 </div>
 
 <script>
-    // 명사 목록
-    const nouns = [
-    // 기존 단어
-    "고양이", "우주선", "냉장고", "마법사", "자전거", 
-    "피자", "외계인", "선생님", "기타", "바다",
-    "호랑이", "컴퓨터", "휴대폰", "구름", "도둑",
-    // 🐾 동물 & 크리처
-    "공룡", "유령", "로봇", "슬라임", "좀비", "드래곤",
-    // 🍔 음식
-    "치킨", "민트초코", "국밥", "떡볶이", "마라탕", "붕어빵",
-    // ⚔️ 판타지 & SF
-    "블랙홀", "타임머신", "전설의 검", "투명망토", "인공지능",
-    // 👤 인물 & 직업
-    "해커", "용사", "아이돌", "스파이", "국회의원", "백수",
-    // 🧻 일상 사물
-    "변기", "침대", "삼선슬리퍼", "리모컨", "효자손", "영수증"
-];
-    
-    // 동사 형태를 '~는' 으로 변경
-    const verbs = [
-    // 기존 단어
-    "먹는", "던지는", "부수는", "사랑하는", "발견하는", 
-    "수리하는", "조립하는", "훔치는", "노래하는", "그리는",
-    "공격하는", "마시는", "숨기는", "기억하는", "잡는",
-    // 💥 액션 & 파괴
-    "걷어차는", "조종하는", "폭파하는", "납치하는", "해킹하는", 
-    "소환하는", "봉인하는", "발명하는", "협박하는", "분해하는",
-    // 😂 황당 & 개그
-    "핥는", "튀겨 먹는", "구워 먹는", "타고 나는", "어부바하는",
-    "째려보는", "간지럼 태우는", "쓰다듬는", "물어뜯는", "핥아먹는",
-    // 🥺 감정 & 상태
-    "숭배하는", "무시하는", "질투하는", "두려워하는", "그리워하는",
-    "원망하는", "집착하는", "응원하는", "놀리는", "외면하는"
-];
+    // ⚙️ 핵심 메커니즘 (Mechanics)
+    const mechanics = [
+        "시간을 되돌리는", "중력이 수시로 반전되는", "적을 아군으로 세뇌하는", 
+        "소리로만 주변을 파악하는", "죽을수록 캐릭터가 강해지는", "그림자에만 숨을 수 있는",
+        "키보드 버튼이 계속 바뀌는", "체력이 곧 재화(돈)인", "한 대만 맞아도 게임 오버인",
+        "맵이 10초마다 무작위로 변하는", "점프를 할 수 없는", "적의 무기를 뺏어서 싸우는"
+    ];
 
-    function generateWords() {
-        // 배열에서 무작위로 하나를 고르는 함수
+    // 🌌 배경 및 테마 (Themes)
+    const themes = [
+        "사이버펑크 지하도시", "버려진 심해 연구소", "누군가의 뒤틀린 꿈속", 
+        "멸망한 마법 세계", "거대한 생물체의 뱃속", "평범한 회사원의 모니터 안",
+        "중세 시대 도서관", "태양이 불타버린 우주정거장", "오염된 기계 무덤",
+        "거인들이 사는 미니어처 방", "시간이 멈춘 시계탑", "모든 것이 픽셀로 이루어진 섬"
+    ];
+
+    // 🕹️ 게임 장르 (Genres)
+    const genres = [
+        "플랫포머", "로그라이크", "퍼즐 어드벤처", "덱빌딩 카드게임", 
+        "리듬 액션", "타워 디펜스", "텍스트 기반 생존게임", "탑다운 슈팅(탄막)",
+        "메트로배니아", "잠입 액션", "경영 시뮬레이션", "방치형 클리커"
+    ];
+
+    function generateGameIdea() {
         const getRandomWord = (array) => array[Math.floor(Math.random() * array.length)];
 
-        // 명사, 동사, 명사 순서로 뽑기
-        const noun1 = getRandomWord(nouns);
-        const verb = getRandomWord(verbs);
-        const noun2 = getRandomWord(nouns);
+        const mechanic = getRandomWord(mechanics);
+        const theme = getRandomWord(themes);
+        const genre = getRandomWord(genres);
 
-        // 결과 화면에 출력
-        const resultText = `${noun1} ${verb} ${noun2}`;
-        document.getElementById("result").innerText = resultText;
+        // 결과 조립: [메커니즘] + [테마] + 배경의 + [장르]
+        const resultText = `"${mechanic}"\n${theme} 배경의 ${genre}`;
+        
+        // 줄바꿈 적용을 위해 innerHTML 사용
+        document.getElementById("result").innerHTML = resultText.replace(/\n/g, '<br>');
     }
 </script>
 
