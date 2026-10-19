@@ -153,6 +153,7 @@
             background: var(--card-2);
             border: 1px solid transparent;
         }
+        .slot.locked { border-color: var(--accent); background: var(--lock-bg); }
         .slot-label { color: var(--muted); font-size: 14px; white-space: nowrap; }
         .slot-value { font-weight: 600; word-break: keep-all; overflow-wrap: anywhere; }
         .slot-btns { display: flex; gap: 4px; }
@@ -171,6 +172,7 @@
             cursor: pointer;
         }
         .icon:hover { border-color: var(--accent); }
+        .icon[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); }
 
         .actions { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; }
         .primary {
@@ -186,6 +188,90 @@
         }
         .primary:hover { background: var(--primary-hover); }
         .primary:active { transform: scale(0.96); }
+        .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+        .btn {
+            min-height: 42px;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 15px;
+            cursor: pointer;
+        }
+        .btn:hover { border-color: var(--accent); }
+        .btn[aria-pressed="true"] { border-color: var(--c-m); color: var(--c-m); font-weight: 700; }
+        .hint { margin: 14px 0 0; text-align: center; color: var(--muted); font-size: 13px; word-break: keep-all; }
+        kbd {
+            font: inherit;
+            font-size: 12px;
+            padding: 1px 6px;
+            border: 1px solid var(--border);
+            border-bottom-width: 2px;
+            border-radius: 5px;
+            background: var(--card);
+        }
+
+        /* 기록 */
+        .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px; }
+        .list-box { min-width: 0; }
+        .list-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+        .list-head h2 { margin: 0; font-size: 16px; }
+        .link-btn {
+            border: 0;
+            background: none;
+            color: var(--muted);
+            font-size: 13px;
+            padding: 4px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .items { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+        .items li { display: flex; gap: 6px; min-width: 0; }
+        .item {
+            flex: 1;
+            min-width: 0;
+            text-align: left;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 14px;
+            line-height: 1.45;
+            cursor: pointer;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+        .item-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .item:hover { border-color: var(--accent); }
+        .items .icon { font-size: 14px; flex: none; }
+        .empty { margin: 0; color: var(--muted); font-size: 14px; }
+
+        #toast {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translate(-50%, 20px);
+            max-width: calc(100vw - 32px);
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: var(--text);
+            color: var(--bg);
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s, transform .2s;
+            text-align: center;
+        }
+        #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
         @media (max-width: 520px) {
             .card { padding: 18px 14px; }
@@ -197,10 +283,15 @@
             .slot-label { grid-area: label; }
             .slot-btns { grid-area: btns; }
             .slot-value { grid-area: value; }
+            .lists { grid-template-columns: 1fr; }
+            .controls { gap: 8px; }
+            fieldset.moods { gap: 4px; justify-content: center; }
+            .chip span { padding: 6px 10px; }
+            .primary { width: 100%; }
         }
         @media (prefers-reduced-motion: reduce) {
             .pop { animation: none; }
-            .primary { transition: none; }
+            .primary, #toast { transition: none; }
         }
     </style>
 </head>
@@ -231,9 +322,32 @@
 
         <div class="actions">
             <button type="button" id="roll" class="primary">아이디어 굴리기 🎲</button>
+            <div class="row">
+                <button type="button" id="copy" class="btn">📋 복사</button>
+                <button type="button" id="share" class="btn">🔗 공유</button>
+                <button type="button" id="fav" class="btn" aria-pressed="false">☆ 즐겨찾기</button>
+            </div>
         </div>
+        <p class="hint"><kbd>Space</kbd> / <kbd>Enter</kbd>로도 굴릴 수 있어요 · 🔒 잠근 칸은 그대로 남아요</p>
+
+        <section class="lists">
+            <div class="list-box">
+                <div class="list-head">
+                    <h2>🕘 최근 아이디어</h2>
+                    <button type="button" class="link-btn" id="clear-history">비우기</button>
+                </div>
+                <ol class="items" id="history"></ol>
+                <p class="empty" id="history-empty">아직 굴린 아이디어가 없어요.</p>
+            </div>
+            <div class="list-box">
+                <div class="list-head"><h2>⭐ 즐겨찾기</h2></div>
+                <ul class="items" id="favs"></ul>
+                <p class="empty" id="favs-empty">마음에 드는 아이디어에 ☆를 눌러 보관하세요.</p>
+            </div>
+        </section>
     </main>
 </div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (() => {
@@ -872,14 +986,93 @@
     const fullText = st => composeText(st) + '\n🎨 아트 스타일: ' + entry('a', st.v.a).text;
 
     /* =====================================================================
+     * 공유 링크: "#1.<g>.<m>.<s>.<p>.<o>.<t>.<a>.<문장틀>.<접두어>.<분위기>.<완전랜덤>"
+     * 각 값은 고정 id(36진수). 앞의 "1"은 형식 버전.
+     * ===================================================================== */
+    const HASH_VERSION = '1';
+    function encode(st) {
+        return [HASH_VERSION]
+            .concat(SLOT_KEYS.map(k => st.v[k].toString(36)))
+            .concat([st.tpl, st.pre, st.mood || 'a', st.chaos ? 1 : 0])
+            .join('.');
+    }
+    const ideaKey = code => String(code).split('.').slice(0, 1 + SLOT_KEYS.length + 2).join('.');
+    // 잘못된 입력이면 null. 일부 칸만 깨졌으면 그 칸은 null로 두고 나머지를 살림.
+    function decode(str) {
+        try {
+            const s = String(str == null ? '' : str).replace(/^#/, '').trim();
+            if (!s || s.length > 120) return null;
+            const parts = s.split('.');
+            if (parts[0] !== HASH_VERSION) return null;
+            const v = {};
+            let valid = 0;
+            SLOT_KEYS.forEach((k, i) => {
+                const raw = parts[1 + i];
+                const id = /^[0-9a-z]{1,4}$/.test(raw || '') ? parseInt(raw, 36) : NaN;
+                if (entry(k, id)) { v[k] = id; valid++; } else v[k] = null;
+            });
+            if (!valid) return null;
+            const n = 1 + SLOT_KEYS.length;
+            const int = (x, max) => (/^\d{1,2}$/.test(x || '') && Number(x) < max ? Number(x) : null);
+            const tpl = int(parts[n], TEMPLATES.length);
+            const pre = int(parts[n + 1], PREFIX_COUNT);
+            const mood = MOOD_NAMES[parts[n + 2]] ? parts[n + 2] : 'a';
+            return { v, tpl, pre, mood, chaos: parts[n + 3] === '1', valid };
+        } catch (e) {
+            return null;
+        }
+    }
+    // decode 결과의 빈 칸을 채워 완전한 아이디어로 만듦
+    function completeIdea(d) {
+        const locks = {};
+        SLOT_KEYS.forEach(k => { locks[k] = d.v[k] != null; });
+        const st = generateIdea({ v: d.v }, { locks, mood: d.mood, chaos: d.chaos });
+        if (d.tpl != null) st.tpl = d.tpl;
+        if (d.pre != null) st.pre = d.pre;
+        SLOT_KEYS.forEach(k => { if (locks[k]) remember(k, st.v[k]); });
+        return st;
+    }
+
+    /* 저장소 (사생활 보호 모드 등에서 실패해도 동작하도록) */
+    function load(key, fallback) {
+        try {
+            const raw = window.localStorage.getItem(key);
+            if (raw == null) return fallback;
+            const val = JSON.parse(raw);
+            return val == null ? fallback : val;
+        } catch (e) {
+            return fallback;
+        }
+    }
+    function save(key, val) {
+        try { window.localStorage.setItem(key, JSON.stringify(val)); } catch (e) { /* 무시 */ }
+    }
+    const KEY_HISTORY = 'wordmaker.history.v1';
+    const KEY_FAVS = 'wordmaker.favs.v1';
+    const KEY_PREFS = 'wordmaker.prefs.v1';
+    const HISTORY_MAX = 10;
+    const FAVS_MAX = 50;
+    const cleanCodes = arr => (Array.isArray(arr) ? arr : [])
+        .filter(c => {
+            if (typeof c !== 'string' || c.length > 120) return false;
+            const d = decode(c);
+            return !!d && d.valid === SLOT_KEYS.length;
+        });
+
+    /* =====================================================================
      * 화면
      * ===================================================================== */
     const $ = id => document.getElementById(id);
     const pitchEl = $('pitch');
     const slotsEl = $('slots');
     const chaosEl = $('chaos');
+    const favBtn = $('fav');
+    const toastEl = $('toast');
     let state = null;
+    const locks = {};
     const slotEls = {};
+    let historyList = cleanCodes(load(KEY_HISTORY, [])).slice(0, HISTORY_MAX);
+    let favs = cleanCodes(load(KEY_FAVS, [])).slice(0, FAVS_MAX);
 
     function el(tag, cls, text) {
         const n = document.createElement(tag);
@@ -891,7 +1084,28 @@
         const c = document.querySelector('input[name="mood"]:checked');
         return c && MOOD_NAMES[c.value] ? c.value : 'a';
     }
-    function options() { return { mood: currentMood(), chaos: chaosEl.checked }; }
+    function setMood(m) {
+        const r = document.querySelector('input[name="mood"][value="' + (MOOD_NAMES[m] ? m : 'a') + '"]');
+        if (r) r.checked = true;
+    }
+    function options() { return { mood: currentMood(), chaos: chaosEl.checked, locks }; }
+    function savePrefs() { save(KEY_PREFS, { mood: currentMood(), chaos: chaosEl.checked }); }
+
+    let toastTimer = 0;
+    function toast(msg) {
+        toastEl.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
+    }
+
+    function setLock(k, on) {
+        locks[k] = !!on;
+        const { li, lock } = slotEls[k];
+        li.classList.toggle('locked', locks[k]);
+        lock.setAttribute('aria-pressed', String(locks[k]));
+        lock.textContent = locks[k] ? '🔒' : '🔓';
+    }
 
     function buildSlots() {
         SLOTS.forEach(s => {
@@ -906,12 +1120,19 @@
             re.title = s.name + '만 다시 뽑기';
             re.addEventListener('click', () => {
                 state = rerollSlot(state, s.k, options());
-                render([s.k]);
+                commit([s.k]);
             });
-            btns.append(re);
+            const lock = el('button', 'icon lock', '🔓');
+            lock.type = 'button';
+            lock.setAttribute('aria-label', s.name + ' 고정');
+            lock.setAttribute('aria-pressed', 'false');
+            lock.title = s.name + ' 고정 (다시 굴려도 유지)';
+            lock.addEventListener('click', () => setLock(s.k, !locks[s.k]));
+            btns.append(re, lock);
             li.append(label, value, btns);
             slotsEl.append(li);
-            slotEls[s.k] = { li, value };
+            slotEls[s.k] = { li, value, lock };
+            locks[s.k] = false;
         });
     }
 
@@ -934,22 +1155,213 @@
             v.textContent = e.text;
             if (!changed || changed.includes(k)) flash(v);
         });
+        renderFavButton();
+    }
+
+    function setHash(code) {
+        try { replaceHash('#' + code); } catch (e) { /* file:// 등 */ }
+    }
+    function replaceHash(h) {
+        if (window.history && window.history.replaceState) window.history.replaceState(null, '', h);
+        else window.location.hash = h;
+    }
+
+    // 사용자가 새 아이디어를 만들었을 때: 화면 + 주소 + 최근 기록
+    function commit(changed) {
+        render(changed);
+        const code = encode(state);
+        setHash(code);
+        if (ideaKey(historyList[0] || '') !== ideaKey(code)) {
+            historyList = [code].concat(historyList.filter(c => ideaKey(c) !== ideaKey(code))).slice(0, HISTORY_MAX);
+            save(KEY_HISTORY, historyList);
+            renderLists();
+        }
     }
 
     function rollAll() {
+        if (SLOT_KEYS.every(k => locks[k])) toast('모든 칸이 잠겨 있어요 — 문장만 바꿔 볼게요');
         state = generateIdea(state, options());
-        render(null);
+        commit(SLOT_KEYS.filter(k => !locks[k]));
     }
+
+    // 저장된 코드(공유 링크·기록)로 복원
+    function restore(code, quiet) {
+        const d = decode(code);
+        if (!d) return false;
+        setMood(d.mood);
+        chaosEl.checked = d.chaos;
+        state = completeIdea(d);
+        render(null);
+        setHash(encode(state));
+        if (!quiet && d.valid < SLOT_KEYS.length) toast('일부 항목을 찾을 수 없어 새로 채웠어요');
+        return true;
+    }
+
+    /* 기록·즐겨찾기 목록 */
+    function listItem(code, onRemove) {
+        const d = decode(code);
+        const li = el('li');
+        const btn = el('button', 'item');
+        btn.append(el('span', 'item-text', composeText(completePreview(d))));
+        btn.type = 'button';
+        btn.title = '이 아이디어 다시 보기';
+        btn.addEventListener('click', () => { restore(code); pitchEl.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+        li.append(btn);
+        if (onRemove) {
+            const x = el('button', 'icon', '✕');
+            x.type = 'button';
+            x.setAttribute('aria-label', '즐겨찾기에서 삭제');
+            x.title = '즐겨찾기에서 삭제';
+            x.addEventListener('click', onRemove);
+            li.append(x);
+        }
+        return li;
+    }
+    // 미리보기는 반복 방지 기록을 건드리지 않도록 빈 칸을 첫 항목으로 채움
+    function completePreview(d) {
+        const v = {};
+        SLOT_KEYS.forEach(k => { v[k] = d.v[k] != null ? d.v[k] : DATA[k].list[0].id; });
+        return { v, tpl: d.tpl || 0, pre: d.pre || 0 };
+    }
+    function renderLists() {
+        const h = $('history');
+        h.textContent = '';
+        historyList.forEach(c => h.append(listItem(c)));
+        $('history-empty').hidden = historyList.length > 0;
+        $('clear-history').hidden = historyList.length === 0;
+
+        const f = $('favs');
+        f.textContent = '';
+        favs.forEach(c => f.append(listItem(c, () => {
+            favs = favs.filter(x => x !== c);
+            save(KEY_FAVS, favs);
+            renderLists();
+            renderFavButton();
+            toast('즐겨찾기에서 뺐어요');
+        })));
+        $('favs-empty').hidden = favs.length > 0;
+    }
+    function isFav() { const key = ideaKey(encode(state)); return favs.some(c => ideaKey(c) === key); }
+    function renderFavButton() {
+        const on = isFav();
+        favBtn.setAttribute('aria-pressed', String(on));
+        favBtn.textContent = on ? '⭐ 즐겨찾기됨' : '☆ 즐겨찾기';
+    }
+    function toggleFav() {
+        const code = encode(state);
+        const key = ideaKey(code);
+        if (isFav()) {
+            favs = favs.filter(c => ideaKey(c) !== key);
+            toast('즐겨찾기에서 뺐어요');
+        } else {
+            favs = [code].concat(favs).slice(0, FAVS_MAX);
+            toast('⭐ 즐겨찾기에 담았어요');
+        }
+        save(KEY_FAVS, favs);
+        renderLists();
+        renderFavButton();
+    }
+
+    /* 복사·공유 */
+    function shareUrl() {
+        const base = /^https?:$/.test(location.protocol)
+            ? location.origin + location.pathname
+            : 'https://wordmaker-eight.vercel.app/';
+        return base + '#' + encode(state);
+    }
+    function legacyCopy(text) {
+        const active = document.activeElement;
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.top = '0';
+        ta.style.left = '-9999px';
+        ta.style.opacity = '0';
+        document.body.append(ta);
+        let ok = false;
+        try {
+            ta.select();
+            ta.setSelectionRange(0, text.length);
+            ok = document.execCommand('copy');
+        } catch (e) {
+            ok = false;
+        }
+        ta.remove();
+        if (active && active.focus) active.focus();
+        return ok;
+    }
+    async function copyText(text) {
+        try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                await navigator.clipboard.writeText(text);
+                return true;
+            }
+        } catch (e) { /* 아래 대체 방법으로 */ }
+        return legacyCopy(text);
+    }
+    async function onCopy() {
+        const ok = await copyText(fullText(state));
+        toast(ok ? '📋 복사했어요!' : '복사에 실패했어요. 문장을 직접 선택해 주세요.');
+    }
+    async function onShare() {
+        const url = shareUrl();
+        const text = fullText(state);
+        if (navigator.share) {
+            try {
+                await navigator.share({ title: '게임 아이디어', text, url });
+                return;
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+            }
+        }
+        const ok = await copyText(text + '\n' + url);
+        toast(ok ? '🔗 링크를 복사했어요!' : '복사에 실패했어요. 주소창의 링크를 써 주세요.');
+    }
+
+    /* 키보드: 입력 요소나 버튼에 포커스가 없을 때 Space/Enter로 굴리기 */
+    document.addEventListener('keydown', e => {
+        if (e.key !== ' ' && e.key !== 'Enter') return;
+        if (e.altKey || e.ctrlKey || e.metaKey || e.isComposing || e.repeat) return;
+        const t = e.target;
+        if (t && t.closest && t.closest('input, textarea, select, button, a[href], [contenteditable], [role="button"], summary')) return;
+        e.preventDefault();
+        rollAll();
+    });
 
     buildSlots();
     $('roll').addEventListener('click', rollAll);
-    state = generateIdea(null, options());
-    render(null);
+    $('copy').addEventListener('click', onCopy);
+    $('share').addEventListener('click', onShare);
+    favBtn.addEventListener('click', toggleFav);
+    $('clear-history').addEventListener('click', () => {
+        historyList = [];
+        save(KEY_HISTORY, historyList);
+        renderLists();
+        toast('최근 기록을 비웠어요');
+    });
+    document.querySelectorAll('input[name="mood"]').forEach(r => r.addEventListener('change', savePrefs));
+    chaosEl.addEventListener('change', savePrefs);
+    window.addEventListener('hashchange', () => {
+        const h = location.hash;
+        if (h.length > 1 && (!state || h.slice(1) !== encode(state))) restore(h);
+    });
+
+    const prefs = load(KEY_PREFS, {});
+    if (prefs && typeof prefs === 'object') {
+        setMood(prefs.mood);
+        chaosEl.checked = prefs.chaos === true;
+    }
+    renderLists();
+    if (!(location.hash.length > 1 && restore(location.hash, true))) {
+        state = generateIdea(null, options());
+        render(null);
+    }
 
     // 테스트·디버그용
     window.WM = {
         DATA, SLOTS, TEMPLATES, PREFIX, EXCLUDE_PAIRS, MOOD_CONFLICT, RECENT_MAX,
-        finalSound, josa, randInt, generateIdea, rerollSlot, composeText, fullText,
+        finalSound, josa, randInt, generateIdea, rerollSlot, composeText, fullText, encode, decode,
         moodAllowed, isExcluded, windowSize, candidates, stats,
         getState: () => state
     };
