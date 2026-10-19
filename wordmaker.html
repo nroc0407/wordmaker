@@ -5,104 +5,955 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>게임 아이디어 생성기</title>
     <style>
+        :root {
+            color-scheme: dark;
+            --bg: #1e1e2f;
+            --card: #2a2a40;
+            --card-2: #33334d;
+            --border: #44445f;
+            --text: #f4f4fa;
+            --muted: #a9a9c2;
+            --accent: #4dd0e1;
+            --primary: #ff5252;
+            --primary-hover: #ff1744;
+            --focus: #ffd54f;
+            --lock-bg: rgba(77, 208, 225, 0.12);
+            --c-g: #4dd0e1;
+            --c-m: #ffb74d;
+            --c-s: #81c784;
+            --c-p: #f48fb1;
+            --c-o: #b39ddb;
+            --c-t: #ff8a65;
+            --c-a: #90caf9;
+        }
+        @media (prefers-color-scheme: light) {
+            :root {
+                color-scheme: light;
+                --bg: #f3f2f9;
+                --card: #ffffff;
+                --card-2: #f0eff8;
+                --border: #d9d7e8;
+                --text: #1f1f2e;
+                --muted: #5e5d75;
+                --accent: #00838f;
+                --primary: #e53935;
+                --primary-hover: #c62828;
+                --focus: #6a4cff;
+                --lock-bg: rgba(0, 131, 143, 0.10);
+                --c-g: #00838f;
+                --c-m: #b45309;
+                --c-s: #2e7d32;
+                --c-p: #ad1457;
+                --c-o: #5e35b1;
+                --c-t: #c2410c;
+                --c-a: #1565c0;
+            }
+        }
+        * { box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
         body {
-            font-family: 'Malgun Gothic', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
             margin: 0;
-            background-color: #1e1e2f; /* 게임 개발 감성으로 어두운 배경 */
-            color: #ffffff;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", system-ui, sans-serif;
+            line-height: 1.5;
         }
-        .container {
-            text-align: center;
-            background-color: #2a2a40;
-            padding: 50px;
-            border-radius: 16px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            max-width: 600px;
-            width: 90%;
+        .wrap {
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 32px 16px 56px;
         }
+        header { text-align: center; margin-bottom: 20px; }
         h1 {
-            color: #4dd0e1;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
-        #result {
-            font-size: 28px;
-            font-weight: bold;
-            color: #ffb74d;
-            margin: 40px 0;
-            min-height: 80px;
-            line-height: 1.4;
+            color: var(--accent);
+            font-size: clamp(22px, 5.5vw, 30px);
+            margin: 0 0 6px;
             word-break: keep-all;
         }
-        button {
-            background-color: #ff5252;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 20px;
-            font-weight: bold;
-            border-radius: 8px;
+        .sub { margin: 0; color: var(--muted); font-size: 15px; word-break: keep-all; }
+
+        /* 옵션 */
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 8px 16px;
+            margin-bottom: 16px;
+        }
+        fieldset.moods {
+            border: 0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+        fieldset.moods legend {
+            float: left;
+            margin-right: 4px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+        .chip { position: relative; display: inline-flex; cursor: pointer; }
+        .chip input { position: absolute; opacity: 0; width: 1px; height: 1px; margin: 0; pointer-events: none; }
+        .chip span {
+            display: inline-block;
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 14px;
+            user-select: none;
+            transition: background-color .15s, border-color .15s;
+        }
+        .chip:hover span { border-color: var(--accent); }
+        .chip input:checked + span {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg);
+            font-weight: 700;
+        }
+        .chip input:focus-visible + span { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+        /* 결과 카드 */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+        #pitch {
+            margin: 0 0 20px;
+            font-size: clamp(19px, 4.6vw, 24px);
+            font-weight: 600;
+            line-height: 1.6;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+            min-height: 3.2em;
+        }
+        #pitch .w { font-weight: 800; }
+        .w-g { color: var(--c-g); } .w-m { color: var(--c-m); } .w-s { color: var(--c-s); }
+        .w-p { color: var(--c-p); } .w-o { color: var(--c-o); } .w-t { color: var(--c-t); } .w-a { color: var(--c-a); }
+        .pop { animation: pop .28s ease-out; }
+        @keyframes pop { from { opacity: .2; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+        .slots { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+        .slot {
+            display: grid;
+            grid-template-columns: 8.5rem 1fr auto;
+            align-items: center;
+            gap: 4px 10px;
+            padding: 8px 8px 8px 12px;
+            border-radius: 10px;
+            background: var(--card-2);
+            border: 1px solid transparent;
+        }
+        .slot-label { color: var(--muted); font-size: 14px; white-space: nowrap; }
+        .slot-value { font-weight: 600; word-break: keep-all; overflow-wrap: anywhere; }
+        .slot-btns { display: flex; gap: 4px; }
+
+        button { font: inherit; }
+        button:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+        .icon {
+            min-width: 40px;
+            height: 40px;
+            padding: 0 8px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--card);
+            color: var(--text);
+            font-size: 18px;
             cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
         }
-        button:hover {
-            background-color: #ff1744;
+        .icon:hover { border-color: var(--accent); }
+
+        .actions { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; }
+        .primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 15px 34px;
+            font-size: 20px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color .2s, transform .1s;
         }
-        button:active {
-            transform: scale(0.95);
+        .primary:hover { background: var(--primary-hover); }
+        .primary:active { transform: scale(0.96); }
+
+        @media (max-width: 520px) {
+            .card { padding: 18px 14px; }
+            .slot {
+                grid-template-columns: 1fr auto;
+                grid-template-areas: "label btns" "value value";
+                padding: 8px 8px 10px 12px;
+            }
+            .slot-label { grid-area: label; }
+            .slot-btns { grid-area: btns; }
+            .slot-value { grid-area: value; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .pop { animation: none; }
+            .primary { transition: none; }
         }
     </style>
 </head>
 <body>
+<div class="wrap">
+    <header>
+        <h1>💡 랜덤 게임 아이디어 제네레이터</h1>
+        <p class="sub">장르·메커니즘·배경·주인공·목표·반전을 굴려서 한 줄 기획서를 뽑아 보세요.</p>
+    </header>
 
-<div class="container">
-    <h1>💡 랜덤 게임 아이디어 제네레이터</h1>
-    <div id="result">새로운 프로젝트 아이디어를 뽑아보세요!</div>
-    <button onclick="generateGameIdea()">아이디어 굴리기 🎲</button>
+    <main>
+        <section class="controls" aria-label="생성 옵션">
+            <fieldset class="moods">
+                <legend>분위기</legend>
+                <label class="chip"><input type="radio" name="mood" value="a" checked><span>전체</span></label>
+                <label class="chip"><input type="radio" name="mood" value="j"><span>진지</span></label>
+                <label class="chip"><input type="radio" name="mood" value="c"><span>코믹</span></label>
+                <label class="chip"><input type="radio" name="mood" value="h"><span>호러</span></label>
+                <label class="chip"><input type="radio" name="mood" value="z"><span>아늑</span></label>
+            </fieldset>
+            <label class="chip" title="궁합을 무시하고 아무거나 섞어요"><input type="checkbox" id="chaos"><span>🌀 완전 랜덤</span></label>
+        </section>
+
+        <section class="card" aria-label="생성된 아이디어">
+            <p id="pitch" aria-live="polite" aria-atomic="true">새로운 프로젝트 아이디어를 뽑아보세요!</p>
+            <ul class="slots" id="slots"></ul>
+        </section>
+
+        <div class="actions">
+            <button type="button" id="roll" class="primary">아이디어 굴리기 🎲</button>
+        </div>
+    </main>
 </div>
 
 <script>
-    // ⚙️ 핵심 메커니즘 (Mechanics)
-    const mechanics = [
-        "시간을 되돌리는", "중력이 수시로 반전되는", "적을 아군으로 세뇌하는", 
-        "소리로만 주변을 파악하는", "죽을수록 캐릭터가 강해지는", "그림자에만 숨을 수 있는",
-        "키보드 버튼이 계속 바뀌는", "체력이 곧 재화(돈)인", "한 대만 맞아도 게임 오버인",
-        "맵이 10초마다 무작위로 변하는", "점프를 할 수 없는", "적의 무기를 뺏어서 싸우는"
+(() => {
+    'use strict';
+
+    /* =====================================================================
+     * 데이터
+     * 한 줄 = "id|문구|분위기|시대|속도|종류"
+     *  - id: 슬롯 안에서 고유하고 절대 바꾸지 않는 번호 (공유 링크가 이 번호를 씀).
+     *        새 항목은 맨 뒤 번호로 추가하고, 지운 번호는 재사용하지 말 것.
+     *  - 분위기: j=진지 c=코믹 h=호러 z=아늑 (여러 개 가능, 비우면 무엇과도 어울림)
+     *  - 시대:   m=현대 f=판타지 s=SF y=역사
+     *  - 속도:   r=실시간 t=턴제 i=방치
+     *  - 종류(반전 슬롯만): r=제약(현재형) v=반전(과거형)
+     * 문법 형태:
+     *  - 장르: 명사 ("로그라이크")
+     *  - 메커니즘: '-는/-인' 관형절 ("시간을 되돌리는") → 뒤에 장르·"시스템"이 옴
+     *  - 배경: '에서'가 붙는 명사구
+     *  - 주인공: 명사구 (조사는 josa()가 받침을 보고 붙임)
+     *  - 목표: '-기' 명사형 ("기억을 되찾기") → "~ 위해", "목표는 ~", "~에 도전"
+     *  - 반전/제약: '-다'로 끝나는 문장 (마침표 없이)
+     * ===================================================================== */
+    const RAW = {
+        g: `
+1|플랫포머|||r
+2|로그라이크|||
+3|퍼즐 어드벤처|||t
+4|덱빌딩 카드게임|||t
+5|리듬 액션|||r
+6|타워 디펜스|||r
+7|텍스트 생존 게임|j||t
+8|탑다운 탄막 슈팅|||r
+9|메트로배니아|||r
+10|잠입 액션|j||r
+11|가게 경영 타이쿤|cz||i
+12|방치형 클리커|c||i
+13|턴제 전술 RPG|j||t
+14|비주얼 노벨|||t
+15|생존 크래프팅|||r
+16|오픈월드 탐험 게임|||r
+17|소울라이크 액션|jh||r
+18|협동 파티 게임|c||r
+19|농장 시뮬레이션|z||i
+20|추리 어드벤처|j||t
+21|서바이벌 호러|h||r
+22|레이싱 게임|||r
+23|대전 격투 게임|||r
+24|배틀로얄|||r
+25|도시 건설 시뮬레이션|||i
+26|4X 전략 게임|j||t
+27|실시간 전략 게임|||r
+28|오토배틀러|||i
+29|매치3 퍼즐|cz||t
+30|방탈출 게임|||t
+31|낚시 게임|z||
+32|연애 시뮬레이션|cz||t
+33|육성 시뮬레이션|z||i
+34|핵앤슬래시|||r
+35|물리 퍼즐|c||
+36|워킹 시뮬레이터|j||
+37|MMORPG|||r
+38|보드게임|cz||t
+39|3인칭 슈터|||r
+40|생활 시뮬레이션|z||i
+41|인터랙티브 무비|j||t
+42|수집형 RPG|||i
+43|던전 크롤러|||t
+44|엔드리스 러너|c||r
+45|요리 게임|cz||r
+46|FPS|||r
+47|JRPG|||t`,
+        m: `
+1|시간을 되돌리는|||
+2|중력이 수시로 뒤집히는|||r
+3|적을 아군으로 세뇌하는|||
+4|소리로만 주변을 파악하는|jh||
+5|죽을수록 캐릭터가 강해지는|||
+6|그림자 속에만 숨을 수 있는|jh||
+7|조작 키가 수시로 바뀌는|c||r
+8|체력이 곧 돈인|c||
+9|한 대만 맞아도 게임 오버인|j||r
+10|맵이 10초마다 무작위로 바뀌는|||r
+11|점프를 할 수 없는|c||
+12|적의 무기를 빼앗아 싸우는|||
+13|플레이어가 움직일 때만 시간이 흐르는|||t
+14|말을 걸 때마다 세계가 조금씩 망가지는|h||
+15|발소리가 적을 불러들이는|jh||
+16|자신의 시체를 발판으로 쓰는|c||
+17|기억을 화폐처럼 거래하는|j||
+18|그린 그림이 현실이 되는|zc|f|
+19|빛이 닿는 곳에서만 움직일 수 있는|h||
+20|두 캐릭터를 동시에 조작하는|||
+21|거짓말이 들키면 끝장나는|j||
+22|요리한 음식으로 능력을 얻는|zc||
+23|죽은 동료가 다시는 돌아오지 않는|j||
+24|날씨를 마음대로 바꾸는||f|
+25|몸 크기를 자유롭게 줄였다 늘렸다 하는|c||
+26|무엇이든 집어 던질 수 있는|c||
+27|게임 규칙을 카드로 바꿔 끼우는|||t
+28|세이브가 단 한 번만 가능한|j||
+29|목소리로 주문을 외우는|c|f|
+30|적이 플레이어의 패턴을 학습하는|j|s|
+31|주변 물체의 중력에 끌려다니는||s|
+32|과거와 미래를 오가는|||
+33|화면 밖의 것은 존재하지 않는|h||
+34|로봇 부품을 조립해 싸우는||s|
+35|감정에 따라 능력이 바뀌는|||
+36|거울 속 세계와 동시에 움직이는||f|
+37|냄새로 길을 찾는|cz||
+38|매 턴 주사위로 능력이 정해지는|c||t
+39|건물을 통째로 들어 옮기는|c||
+40|아무도 죽이지 않고 클리어해야 하는|jz||
+41|해킹으로 사물을 조종하는||sm|
+42|손전등 배터리를 아껴야 하는|h|m|
+43|실수할수록 음악이 빨라지는|c||r
+44|NPC가 플레이어의 모든 선택을 기억하는|j||
+45|오직 말싸움으로만 싸우는|c||
+46|몸이 점점 다른 생물로 변해 가는|h||
+47|같은 하루를 반복하며 단서를 모으는|j||
+48|행동할 때마다 수명이 줄어드는|jh||
+49|마법진을 직접 그려서 시전하는||f|
+50|물이 차오르기 전에 탈출해야 하는|j||r
+51|반려동물과 몸을 바꿔 가며 퍼즐을 푸는|cz||
+52|낮에는 준비하고 밤에는 버티는|||
+53|흔적을 지우며 도망치는|j||
+54|접속하지 않는 동안에도 세계가 돌아가는|z||i
+55|무언가를 버려야만 강해지는|j||`,
+        s: `
+1|사이버펑크 지하 도시|j|s|
+2|버려진 심해 연구소|h|ms|
+3|누군가의 뒤틀린 꿈속|h||
+4|멸망한 마법 세계|j|f|
+5|거대한 생물의 뱃속|hc||
+6|평범한 회사원의 모니터 안|c|m|
+7|중세 시대 도서관|jz|y|
+8|태양이 꺼져 버린 우주정거장|jh|s|
+9|오염된 기계 무덤|j|s|
+10|거인들이 사는 미니어처 방|c|f|
+11|시간이 멈춘 시계탑|j|f|
+12|모든 것이 픽셀로 이루어진 섬|cz||
+13|비 내리는 네온 골목|j|sm|
+14|문 닫기 직전의 동네 편의점|cz|m|
+15|끝없이 이어지는 호텔 복도|h|m|
+16|구름 위에 떠 있는 섬마을|z|f|
+17|좀비가 점령한 쇼핑몰|hc|m|
+18|조선 시대 한양 저잣거리||y|
+19|고대 이집트 피라미드 내부|j|y|
+20|빙하기 원시 부족 마을||y|
+21|화성 개척 기지|j|s|
+22|망해 가는 놀이공원|ch|m|
+23|고양이들이 지배하는 도시|cz||
+24|침몰 중인 호화 여객선|j|y|
+25|숲속 마녀의 오두막|z|f|
+26|폐교된 시골 초등학교|h|m|
+27|해적들의 떠다니는 시장|c|y|
+28|잠든 용의 등 위에 세운 마을|z|f|
+29|버려진 지하철 환승역|h|m|
+30|AI가 운영하는 완벽한 신도시|j|s|
+31|서부 개척 시대의 국경 마을||y|
+32|현미경 속 미생물 왕국|c||
+33|할머니 댁 다락방|z|m|
+34|블랙홀 근처의 관측소|j|s|
+35|밤이 끝나지 않는 가면무도회장|h||
+36|거대 버섯 숲|z|f|
+37|1980년대 동네 오락실|cz|m|
+38|전쟁이 막 끝난 폐허 도시|j|m|
+39|고장 난 우주 화물선||s|
+40|바닷속 인어 왕국|z|f|
+41|신들이 버린 천공의 신전|j|f|
+42|눈보라에 갇힌 산장|h|m|
+43|마감 하루 전 게임 회사 사무실|c|m|
+44|아이 방의 장난감 상자 안|cz|m|
+45|전염병이 도는 중세 항구 도시|jh|y|
+46|사막을 걸어 다니는 거대 이동 도시|j||
+47|영혼들이 잠시 머무는 간이역|zj|f|
+48|인류가 사라진 뒤의 지구|j|s|
+49|은하 변두리의 24시 라면 가게|cz|s|
+50|왕궁 지하의 비밀 감옥|j|fy|
+51|몬스터가 출몰하는 서울 한복판|c|mf|
+52|하늘을 향해 끝없이 자라는 탑|j|f|
+53|얼어붙은 북극 연구 기지|h|m|
+54|데이터가 흐르는 가상 세계||s|`,
+        p: `
+1|은퇴한 용사|c|f|
+2|입사 첫날인 신입 사원|c|m|
+3|길 잃은 고양이|zc||
+4|기억을 잃은 로봇|j|s|
+5|마지막 남은 인류|j|s|
+6|겁 많은 퇴마사|hc||
+7|마법학교 낙제생|c|f|
+8|야간 경비원|h|m|
+9|유령이 된 배달부|hc||
+10|늙은 등대지기|jz||
+11|카페를 운영하는 전직 해커|c|m|
+12|신분을 숨긴 공주|j|fy|
+13|아직 불을 못 뿜는 아기 드래곤|cz|f|
+14|감염 사실을 숨긴 생존자|h|m|
+15|우주 택배 기사|c|s|
+16|조선의 암행어사|j|y|
+17|동네 꼬마 탐정|cz|m|
+18|해고 위기의 저승사자|c|f|
+19|망한 밴드의 보컬|c|m|
+20|삼천 년 만에 깨어난 미라|hc|y|
+21|실험실을 탈출한 슬라임|c|s|
+22|홀로 남은 우주비행사|j|s|
+23|저주받은 기사|jh|f|
+24|동네 빵집 사장님|z|m|
+25|신참 형사|j|m|
+26|떠돌이 음유시인|z|f|
+27|AI 청소 로봇|c|s|
+28|인형에 갇힌 영혼|h||
+29|이름 없는 실험체 13호|jh|s|
+30|시간 여행자|j|s|
+31|뜨개질하는 할머니 마법사|zc|f|
+32|빚더미에 앉은 상인|c|fy|
+33|견습 연금술사||f|
+34|해적선의 요리사|c|y|
+35|구독자 열 명인 유튜버|c|m|
+36|멸종을 피한 마지막 공룡|c||
+37|퇴근하고 싶은 마왕|c|f|
+38|말을 하지 못하는 소년|j||
+39|꿀벌 한 마리|zc||
+40|정체불명의 복면 레슬러|c|m|
+41|수련을 땡땡이친 닌자|c|y|
+42|외계에서 온 관광객|c|s|
+43|우주 해적 선장|c|s|
+44|왕국의 세금 징수원|c|f|
+45|말하는 화분|zc||
+46|엑소시스트 수녀|hj||
+47|전직 탐험가인 할아버지|z||
+48|거대 로봇 조종사|j|s|
+49|산신령의 견습생|zc|y|
+50|평범한 고등학생||m|`,
+        o: `
+1|잃어버린 기억을 되찾기|j||
+2|막차를 놓치지 않기|c|m|
+3|세상에서 가장 맛있는 수프를 완성하기|zc||
+4|무사히 정시 퇴근하기|c|m|
+5|자신에게 걸린 저주를 풀기|j|f|
+6|아침이 올 때까지 살아남기|h||
+7|왕국의 빚을 전부 갚기|c|f|
+8|사라진 동료를 구출하기|j||
+9|우주선을 고쳐 집으로 돌아가기|j|s|
+10|모두가 잠든 사이에 탈출하기|jh||
+11|동네 최고의 맛집으로 소문나기|zc|m|
+12|진짜 범인을 밝혀내기|j||
+13|세계 멸망을 일주일만 미루기|c||
+14|길고양이 백 마리를 입양 보내기|zc|m|
+15|전설의 보물을 손에 넣기||f|
+16|정체를 들키지 않고 하루를 버티기|j||
+17|무너진 도시를 재건하기|j||
+18|첫사랑에게 고백하기|cz||
+19|신을 쓰러뜨리기|j|f|
+20|황폐한 행성을 다시 푸르게 만들기|z|s|
+21|사람들의 소원을 하나씩 들어주기|z||
+22|탑의 꼭대기에 오르기||f|
+23|악몽의 근원을 찾아 없애기|h||
+24|전설의 최고 기록을 깨기|c||
+25|잃어버린 반려동물을 찾기|z||
+26|이승에 남은 미련을 정리하기|jz||
+27|혁명을 성공시키기|j|y|
+28|밴드를 다시 모아 무대에 서기|c|m|
+29|세상에 남은 마지막 씨앗을 지키기|j||
+30|빼앗긴 왕좌를 되찾기|j|fy|
+31|감염이 퍼지기 전에 해독제를 만들기|jh||
+32|모든 몬스터와 친구 되기|cz||
+33|은하 최고의 레이서가 되기|c|s|
+34|천 년 묵은 수수께끼를 풀기||fy|
+35|마왕성에 택배를 배달하기|c|f|
+36|정체불명의 신호를 추적하기|h|s|
+37|가족이 기다리는 집으로 돌아가기|jz||
+38|침입자로부터 마을을 지키기|j||
+39|사라진 문명의 비밀을 밝히기|j|y|
+40|이웃 모두를 행복하게 만들기|z||
+41|망해 가는 가게를 살리기|cz|m|
+42|끝나지 않는 시간의 고리를 끊기|j||
+43|구독자 백만 명을 달성하기|c|m|
+44|숨겨 둔 간식을 끝까지 지키기|c||
+45|기계들의 반란을 막기|j|s|
+46|용에게 납치된 왕자를 구하기|c|f|
+47|저택에서 들리는 목소리의 정체를 밝히기|h||
+48|은퇴 전 마지막 한탕을 성공시키기|cj||`,
+        t: `
+1|점프는 단 세 번만 할 수 있다|c|||r
+2|체력이 0이 되면 세이브 파일이 지워진다|jh|||r
+3|모든 대사가 이모지로만 표시된다|c|||r
+4|화면이 점점 좁아진다|h||r|r
+5|주인공은 앞을 볼 수 없다|jh|||r
+6|모든 적이 처음엔 친절하다|hc|||r
+7|한 번 지나간 길은 다시 갈 수 없다|j|||r
+8|게임 전체가 단 10분 만에 끝난다|||r|r
+9|무기는 숟가락 하나뿐이다|c|||r
+10|배경 음악이 멈추면 적이 깨어난다|h|||r
+11|NPC들은 모두 거짓말만 한다|ch|||r
+12|돈을 쓸 때마다 세상이 조금씩 어두워진다|jh|||r
+13|하루에 한 번만 플레이할 수 있다|z||i|r
+14|두 플레이어가 한 몸을 나눠 조종한다|c|||r
+15|주인공은 말을 할 수 없다|j|||r
+16|지도가 없어서 직접 그려야 한다|j|||r
+17|게임 속 시간이 현실 시간과 똑같이 흐른다|z||i|r
+18|모든 상점 주인이 같은 사람이다|c|||r
+19|죽으면 적으로 다시 태어난다|hj|||r
+20|게임 속 글자가 하나씩 사라진다|h|||r
+21|내레이터가 주인공의 모든 행동을 비꼰다|c|||r
+22|공격 버튼이 존재하지 않는다|cz|||r
+23|한 판이 끝날 때마다 주인공이 한 살씩 늙는다|j|||r
+24|동료로는 고양이만 고용할 수 있다|cz|||r
+25|비가 오는 동안에만 이동할 수 있다|j|||r
+26|불이 꺼지면 모든 규칙이 반대가 된다|h|||r
+27|레벨이 오를수록 오히려 약해진다|c|||r
+28|주인공이 사실 최종 보스였다|j|||v
+29|모든 것이 할머니의 옛날이야기였다|z|||v
+30|세계 전체가 누군가의 어항 속이었다|ch|||v
+31|적들은 미래에서 온 주인공 자신이었다|j|||v
+32|플레이어가 조종하던 건 주인공의 그림자였다|h|||v
+33|튜토리얼 안내원이 흑막이었다|cj|||v
+34|몬스터들은 모두 저주받은 마을 사람들이었다|hj|||v
+35|주인공은 이미 오래전에 죽어 있었다|h|||v
+36|이 모든 게 누군가의 게임 방송이었다|c|m||v
+37|구하려던 왕국이 사실 악당의 나라였다|j|f||v
+38|최종 보스가 사실 겁 많은 강아지였다|cz|||v
+39|정해진 엔딩은 단 하나뿐이었다|j|||v
+40|지금까지의 모든 선택이 녹화되고 있었다|h|sm||v
+41|동료 중 한 명은 정체를 숨긴 외계인이었다|c|s||v
+42|탈출구는 처음부터 열려 있었다|hj|||v
+43|내레이터가 사실 주인공의 고양이였다|cz|||v
+44|세상을 만든 신은 마감에 쫓기는 게임 개발자였다|c|||v
+45|보물 상자 속엔 편지 한 장뿐이었다|zj|||v
+46|마을 사람 모두가 같은 꿈을 꾸고 있었다|h|||v
+47|처음 만난 NPC가 마지막 생존자였다|jh|||v
+48|모든 퀘스트는 한 아이의 소원이었다|z|||v`,
+        a: `
+1|도트 픽셀 아트|c||
+2|손그림 수채화|z||
+3|로우폴리 3D|||
+4|흑백 잉크 드로잉|jh||
+5|네온 벡터 그래픽||s|
+6|클레이 애니메이션|cz||
+7|종이 오리기 콜라주|cz||
+8|90년대 셀 애니메이션|c|m|
+9|동화책 일러스트|z|f|
+10|아스키 아트|||
+11|우키요에 판화풍||y|
+12|글리치 아트|h|s|
+13|파스텔 아이소메트릭|z||
+14|크레파스 낙서|cz||
+15|스테인드글라스|j|f|
+16|VHS 비디오 화질|h|m|
+17|음울한 유화|jh||
+18|복셀 블록|c||
+19|실루엣 그림자극|jh||
+20|만화책 컷 연출|c||
+21|포토리얼 실사풍|j||`
+    };
+
+    const SLOTS = [
+        { k: 'g', name: '장르', emoji: '🕹️' },
+        { k: 'm', name: '핵심 메커니즘', emoji: '⚙️' },
+        { k: 's', name: '배경', emoji: '🌌' },
+        { k: 'p', name: '주인공', emoji: '🦸' },
+        { k: 'o', name: '목표', emoji: '🎯' },
+        { k: 't', name: '반전·제약', emoji: '🃏' },
+        { k: 'a', name: '아트 스타일', emoji: '🎨' }
     ];
+    const SLOT_KEYS = SLOTS.map(s => s.k);
 
-    // 🌌 배경 및 테마 (Themes)
-    const themes = [
-        "사이버펑크 지하도시", "버려진 심해 연구소", "누군가의 뒤틀린 꿈속", 
-        "멸망한 마법 세계", "거대한 생물체의 뱃속", "평범한 회사원의 모니터 안",
-        "중세 시대 도서관", "태양이 불타버린 우주정거장", "오염된 기계 무덤",
-        "거인들이 사는 미니어처 방", "시간이 멈춘 시계탑", "모든 것이 픽셀로 이루어진 섬"
-    ];
-
-    // 🕹️ 게임 장르 (Genres)
-    const genres = [
-        "플랫포머", "로그라이크", "퍼즐 어드벤처", "덱빌딩 카드게임", 
-        "리듬 액션", "타워 디펜스", "텍스트 기반 생존게임", "탑다운 슈팅(탄막)",
-        "메트로배니아", "잠입 액션", "경영 시뮬레이션", "방치형 클리커"
-    ];
-
-    function generateGameIdea() {
-        const getRandomWord = (array) => array[Math.floor(Math.random() * array.length)];
-
-        const mechanic = getRandomWord(mechanics);
-        const theme = getRandomWord(themes);
-        const genre = getRandomWord(genres);
-
-        // 결과 조립: [메커니즘] + [테마] + 배경의 + [장르]
-        const resultText = `"${mechanic}"\n${theme} 배경의 ${genre}`;
-        
-        // 줄바꿈 적용을 위해 innerHTML 사용
-        document.getElementById("result").innerHTML = resultText.replace(/\n/g, '<br>');
+    function parseSlot(raw) {
+        const list = [];
+        const byId = new Map();
+        raw.split('\n').forEach(line => {
+            line = line.trim();
+            if (!line) return;
+            const [id, text, tone = '', era = '', pace = '', kind = ''] = line.split('|');
+            const e = {
+                id: Number(id),
+                text: text.trim(),
+                tone: tone.split(''),
+                era: era.split(''),
+                pace: pace || '',
+                kind: kind || ''
+            };
+            list.push(e);
+            byId.set(e.id, e);
+        });
+        return { list, byId };
     }
-</script>
+    const DATA = {};
+    SLOT_KEYS.forEach(k => { DATA[k] = parseSlot(RAW[k]); });
+    const entry = (k, id) => DATA[k].byId.get(id);
 
+    /* 문장 틀: {슬롯} 또는 {슬롯:조사쌍}. 마지막 {t}는 접두어 + 반전/제약 문장. */
+    const TEMPLATES = [
+        '{m} {g}. {s}에서 {p:이/가} {o} 위해 고군분투한다. {t}.',
+        '장르는 {m} {g}, 무대는 {s}. 당신은 {p}, 목표는 {o}. {t}.',
+        '{p:으로/로} 플레이하는 {g}! 핵심은 {m} 시스템. {s:을/를} 무대로 {o}에 도전하라! {t}.',
+        '{g:와/과} {m} 시스템의 만남. {p:은/는} {s}에서 눈을 뜨고, {o}에 나선다. {t}.'
+    ];
+    const PREFIX = {
+        r: ['단, ', '하지만 ', '제약: '],
+        v: ['그런데 알고 보니 ', '반전: ', '충격 반전 — ']
+    };
+    const PREFIX_COUNT = 3;
+
+    /* =====================================================================
+     * 한국어 조사 (받침 판별)
+     * finalSound(): 0 = 받침 없음, 1 = 받침 있음, 2 = ㄹ 받침
+     * ===================================================================== */
+    const JOSA = {
+        '은/는': ['은', '는'],
+        '이/가': ['이', '가'],
+        '을/를': ['을', '를'],
+        '와/과': ['과', '와'],
+        '으로/로': ['으로', '로']
+    };
+    // 숫자 끝자리 읽기: 영 일 이 삼 사 오 육 칠 팔 구 (10, 100 등은 '십/백/천/만'이라 모두 받침 → 0과 같은 값)
+    const DIGIT_SOUND = { 0: 1, 1: 2, 2: 0, 3: 1, 4: 0, 5: 0, 6: 1, 7: 2, 8: 2, 9: 0 };
+    // 알파벳 이름 읽기: 엘(L) 엠(M) 엔(N) 알(R)만 받침이 있음
+    const LETTER_SOUND = { L: 2, M: 1, N: 1, R: 2 };
+
+    function finalSound(word) {
+        let w = String(word == null ? '' : word).trim();
+        w = w.replace(/\s*\([^()]*\)\s*$/, '');            // "체력(HP)" → "체력"
+        w = w.replace(/[^0-9A-Za-z가-힣]+$/, '');  // 끝의 따옴표·문장부호 무시
+        if (!w) return 0;
+        const ch = w[w.length - 1];
+        const code = ch.charCodeAt(0);
+        if (code >= 0xAC00 && code <= 0xD7A3) {
+            const jong = (code - 0xAC00) % 28;
+            return jong === 0 ? 0 : (jong === 8 ? 2 : 1);
+        }
+        if (ch >= '0' && ch <= '9') return DIGIT_SOUND[ch];
+        const run = (w.match(/[A-Za-z]+$/) || [''])[0];
+        if (run) {
+            // 대문자 약어(RPG, VR, FPS)나 한 글자는 알파벳 이름으로 읽음
+            if (run.length === 1 || run === run.toUpperCase()) {
+                return LETTER_SOUND[run[run.length - 1].toUpperCase()] || 0;
+            }
+            // 일반 영단어는 대략적인 발음 규칙으로 추정
+            const low = run.toLowerCase();
+            if (/(ng|m|n|[mn]e)$/.test(low)) return 1;   // Steam, game, line
+            if (/(l|[aeiou]le)$/.test(low)) return 2;    // pixel, role
+            if (/(ck|t|p)$/.test(low)) return 1;          // back, robot, chip
+            return 0;                                     // apple, zelda, puzzle
+        }
+        return 0;
+    }
+    function josa(word, pair) {
+        const forms = JOSA[pair];
+        if (!forms) return pair;
+        const s = finalSound(word);
+        if (pair === '으로/로') return s === 1 ? forms[0] : forms[1];
+        return s ? forms[0] : forms[1];
+    }
+
+    /* =====================================================================
+     * 난수: crypto.getRandomValues + 거절 표본추출(편향 없는 정수)
+     * ===================================================================== */
+    const hasCrypto = typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function';
+    const rbuf = new Uint32Array(64);
+    let rpos = rbuf.length;
+    function rand32() {
+        if (!hasCrypto) return Math.floor(Math.random() * 4294967296);
+        if (rpos >= rbuf.length) { crypto.getRandomValues(rbuf); rpos = 0; }
+        return rbuf[rpos++];
+    }
+    function randInt(n) {
+        n = Math.floor(n);
+        if (!(n >= 1) || n > 4294967296) throw new RangeError('randInt: bad n ' + n);
+        if (n === 1) return 0;
+        const limit = 4294967296 - (4294967296 % n);
+        let x;
+        do { x = rand32(); } while (x >= limit);
+        return x % n;
+    }
+
+    /* =====================================================================
+     * 궁합: 태그가 겹치면 가중치↑, 부딪치면↓, 확실히 말이 안 되는 쌍만 제외
+     * ===================================================================== */
+    const TONE_CLASH = new Set(['h:z', 'z:h', 'j:c', 'c:j']);
+    const ERA_FAR = new Set(['s:y', 'y:s']);
+    const PACE_FAR = new Set(['r:i', 'i:r']);
+    // 분위기 필터: 고른 분위기와 충돌하는 태그'만' 가진 항목은 제외 (태그 없는 항목은 항상 허용)
+    const MOOD_CONFLICT = { j: ['c'], c: ['j'], h: ['z', 'c'], z: ['h'] };
+    const MOOD_NAMES = { a: '전체', j: '진지', c: '코믹', h: '호러', z: '아늑' };
+
+    const crosses = (a, b, set) => a.some(x => b.some(y => set.has(x + ':' + y)));
+    const overlaps = (a, b) => a.some(x => b.includes(x));
+    function tagScore(a, b, farSet, near, far, other) {
+        if (!a.length || !b.length) return 1;
+        if (overlaps(a, b)) return near;
+        return crosses(a, b, farSet) ? far : other;
+    }
+    function pairScore(e, c) {
+        let s = tagScore(e.tone, c.tone, TONE_CLASH, 1.6, 0.35, 0.75);
+        s *= tagScore(e.era, c.era, ERA_FAR, 1.6, 0.3, 0.6);
+        if (e.pace && c.pace) s *= e.pace === c.pace ? 1.5 : (PACE_FAR.has(e.pace + ':' + c.pace) ? 0.3 : 0.6);
+        return s;
+    }
+
+    // 명백히 말이 안 되는 조합 (양방향)
+    const EXCLUDE_PAIRS = [
+        ['m', 9, 'g', 12],   // 한 대만 맞아도 게임 오버인 방치형 클리커
+        ['m', 50, 'g', 12],  // 물이 차오르기 전에 탈출해야 하는 방치형 클리커
+        ['m', 43, 'g', 14],  // 실수할수록 음악이 빨라지는 비주얼 노벨
+        ['m', 10, 'g', 14],  // 맵이 10초마다 바뀌는 비주얼 노벨
+        ['m', 13, 'g', 5],   // 움직일 때만 시간이 흐르는 리듬 액션
+        ['m', 54, 'g', 5],   // 접속 안 해도 돌아가는 리듬 액션
+        ['m', 54, 'g', 22],  // … 레이싱
+        ['m', 54, 'g', 23],  // … 대전 격투
+        ['m', 40, 'g', 24],  // 아무도 죽이지 않는 배틀로얄
+        ['m', 20, 't', 14],  // 두 캐릭터 동시 조작 + 두 플레이어가 한 몸
+        ['m', 45, 't', 15],  // 말싸움으로 싸우는데 말을 못 함
+        ['m', 11, 't', 1],   // 점프 불가인데 점프는 세 번
+        ['m', 12, 't', 22],  // 무기를 빼앗아 싸우는데 공격 버튼 없음
+        ['g', 34, 't', 22],  // 공격 버튼 없는 핵앤슬래시
+        ['g', 37, 't', 8],   // 10분 만에 끝나는 MMORPG
+        ['g', 26, 't', 8]    // 10분 만에 끝나는 4X
+    ];
+    const EXCL = new Set();
+    EXCLUDE_PAIRS.forEach(([a, ia, b, ib]) => { EXCL.add(a + ia + '|' + b + ib); EXCL.add(b + ib + '|' + a + ia); });
+    function isExcluded(slot, e, ctx) {
+        for (const k in ctx) {
+            const c = ctx[k];
+            if (c && EXCL.has(slot + e.id + '|' + k + c.id)) return true;
+        }
+        return false;
+    }
+    function moodAllowed(e, mood) {
+        if (!mood || mood === 'a' || !e.tone.length || e.tone.includes(mood)) return true;
+        const bad = MOOD_CONFLICT[mood] || [];
+        return !e.tone.some(t => bad.includes(t));
+    }
+    function weightOf(e, ctx, mood, chaos) {
+        if (chaos) return 1;
+        let lw = 0;
+        for (const k in ctx) if (ctx[k]) lw += Math.log(pairScore(e, ctx[k]));
+        let w = Math.exp(Math.max(-2.5, Math.min(2, lw)));   // 극단적인 쏠림 방지
+        if (mood && mood !== 'a' && e.tone.includes(mood)) w *= 3;
+        return w;
+    }
+
+    /* =====================================================================
+     * 반복 방지: 슬롯마다 최근 K개(후보 수의 40%, 최대 20개)는 다시 뽑지 않음
+     * ===================================================================== */
+    const RECENT_MAX = 20;
+    const recent = {};
+    SLOT_KEYS.forEach(k => { recent[k] = []; });
+    const stats = { fallbacks: 0 };
+    const windowSize = n => Math.min(RECENT_MAX, Math.floor(n * 0.4));
+    function remember(slot, id) {
+        const r = recent[slot];
+        r.push(id);
+        if (r.length > RECENT_MAX) r.splice(0, r.length - RECENT_MAX);
+    }
+    function candidates(slot, mood) {
+        const pool = DATA[slot].list;
+        const c = pool.filter(e => moodAllowed(e, mood));
+        return c.length ? c : pool.slice();
+    }
+    function pick(slot, ctx, opt) {
+        const mood = opt.mood || 'a';
+        const chaos = !!opt.chaos;
+        const cands = candidates(slot, mood);
+        const K = windowSize(cands.length);
+        const recentIds = K ? recent[slot].slice(-K) : [];
+        const ok = e => chaos || !isExcluded(slot, e, ctx);
+        let pool = cands.filter(e => ok(e) && e.id !== opt.avoid && !recentIds.includes(e.id));
+        if (!pool.length) {
+            stats.fallbacks++;
+            pool = cands.filter(e => ok(e) && e.id !== opt.avoid);
+            if (!pool.length) pool = cands;
+        }
+        const ws = pool.map(e => Math.max(1, Math.round(weightOf(e, ctx, mood, chaos) * 1000)));
+        let total = 0;
+        ws.forEach(w => { total += w; });
+        let r = randInt(total);
+        for (let i = 0; i < pool.length; i++) {
+            r -= ws[i];
+            if (r < 0) { remember(slot, pool[i].id); return pool[i]; }
+        }
+        remember(slot, pool[pool.length - 1].id);
+        return pool[pool.length - 1];
+    }
+
+    /* 아이디어 = { v: {슬롯: id}, tpl, pre, mood, chaos } */
+    function generateIdea(prev, opt) {
+        opt = opt || {};
+        const locks = opt.locks || {};
+        const v = {};
+        const ctx = {};
+        SLOT_KEYS.forEach(k => {
+            if (locks[k] && prev && prev.v && entry(k, prev.v[k])) { v[k] = prev.v[k]; ctx[k] = entry(k, v[k]); }
+        });
+        SLOT_KEYS.forEach(k => {
+            if (k in v) return;
+            const e = pick(k, ctx, opt);
+            v[k] = e.id;
+            ctx[k] = e;
+        });
+        return { v, tpl: randInt(TEMPLATES.length), pre: randInt(PREFIX_COUNT), mood: opt.mood || 'a', chaos: !!opt.chaos };
+    }
+    function rerollSlot(prev, slot, opt) {
+        opt = opt || {};
+        const ctx = {};
+        SLOT_KEYS.forEach(k => { if (k !== slot) ctx[k] = entry(k, prev.v[k]); });
+        const e = pick(slot, ctx, Object.assign({}, opt, { avoid: prev.v[slot] }));
+        const next = { v: Object.assign({}, prev.v), tpl: prev.tpl, pre: prev.pre, mood: opt.mood || 'a', chaos: !!opt.chaos };
+        next.v[slot] = e.id;
+        if (slot === 't') next.pre = randInt(PREFIX_COUNT);
+        return next;
+    }
+
+    /* 문장 조립 → [{text, slot?}] */
+    function composeParts(st) {
+        const tpl = TEMPLATES[st.tpl] || TEMPLATES[0];
+        const parts = [];
+        const re = /\{([a-z])(?::([^}]+))?\}/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(tpl))) {
+            if (m.index > last) parts.push({ text: tpl.slice(last, m.index) });
+            const k = m[1];
+            const e = entry(k, st.v[k]);
+            if (k === 't') {
+                const list = PREFIX[e.kind === 'v' ? 'v' : 'r'];
+                parts.push({ text: list[(st.pre || 0) % list.length] });
+            }
+            parts.push({ text: e.text, slot: k });
+            if (m[2]) parts.push({ text: josa(e.text, m[2]) });
+            last = re.lastIndex;
+        }
+        if (last < tpl.length) parts.push({ text: tpl.slice(last) });
+        return parts;
+    }
+    const composeText = st => composeParts(st).map(p => p.text).join('');
+    const fullText = st => composeText(st) + '\n🎨 아트 스타일: ' + entry('a', st.v.a).text;
+
+    /* =====================================================================
+     * 화면
+     * ===================================================================== */
+    const $ = id => document.getElementById(id);
+    const pitchEl = $('pitch');
+    const slotsEl = $('slots');
+    const chaosEl = $('chaos');
+    let state = null;
+    const slotEls = {};
+
+    function el(tag, cls, text) {
+        const n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text != null) n.textContent = text;
+        return n;
+    }
+    function currentMood() {
+        const c = document.querySelector('input[name="mood"]:checked');
+        return c && MOOD_NAMES[c.value] ? c.value : 'a';
+    }
+    function options() { return { mood: currentMood(), chaos: chaosEl.checked }; }
+
+    function buildSlots() {
+        SLOTS.forEach(s => {
+            const li = el('li', 'slot');
+            li.dataset.slot = s.k;
+            const label = el('span', 'slot-label', s.emoji + ' ' + s.name);
+            const value = el('span', 'slot-value w-' + s.k);
+            const btns = el('span', 'slot-btns');
+            const re = el('button', 'icon reroll', '🎲');
+            re.type = 'button';
+            re.setAttribute('aria-label', s.name + '만 다시 뽑기');
+            re.title = s.name + '만 다시 뽑기';
+            re.addEventListener('click', () => {
+                state = rerollSlot(state, s.k, options());
+                render([s.k]);
+            });
+            btns.append(re);
+            li.append(label, value, btns);
+            slotsEl.append(li);
+            slotEls[s.k] = { li, value };
+        });
+    }
+
+    function flash(node) {
+        node.classList.remove('pop');
+        void node.offsetWidth;
+        node.classList.add('pop');
+    }
+
+    function render(changed) {
+        pitchEl.textContent = '';
+        composeParts(state).forEach(p => {
+            if (p.slot) pitchEl.append(el('span', 'w w-' + p.slot, p.text));
+            else pitchEl.append(document.createTextNode(p.text));
+        });
+        flash(pitchEl);
+        SLOT_KEYS.forEach(k => {
+            const e = entry(k, state.v[k]);
+            const v = slotEls[k].value;
+            v.textContent = e.text;
+            if (!changed || changed.includes(k)) flash(v);
+        });
+    }
+
+    function rollAll() {
+        state = generateIdea(state, options());
+        render(null);
+    }
+
+    buildSlots();
+    $('roll').addEventListener('click', rollAll);
+    state = generateIdea(null, options());
+    render(null);
+
+    // 테스트·디버그용
+    window.WM = {
+        DATA, SLOTS, TEMPLATES, PREFIX, EXCLUDE_PAIRS, MOOD_CONFLICT, RECENT_MAX,
+        finalSound, josa, randInt, generateIdea, rerollSlot, composeText, fullText,
+        moodAllowed, isExcluded, windowSize, candidates, stats,
+        getState: () => state
+    };
+})();
+</script>
 </body>
 </html>
